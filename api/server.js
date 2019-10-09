@@ -156,18 +156,26 @@ app.put('/api/:id', (req, res) => {
 
 // DELETE by ID - (remove)
 
-app.delete('/api/:id', (req, res) => {
-     
+app.delete('/api/:id', (req, res) => {    
     db.open( (err, mongoClient) => {
         mongoClient.collection('postagens', (err, collection)=> {
-            collection.remove({ _id : ObjectId(req.params.id) }, (err, records) => {
-                if(err) {
-                    res.json(err);   
-                } else {
-                    res.json(records);
-                }
-                mongoClient.close()
-            })
+            collection.update(
+                {  }, 
+                {  $pull : {
+                                comentarios: { id_comentario : ObjectId(req.params.id)}
+                            }
+                },
+                { multi : true },              
+                (err, records) => {
+                    if(err) {
+                        res.json(err);   
+                    } else {
+                        res.json(records);
+                    }
+                    
+                    mongoClient.close()
+                },
+            )
         });
     });
 });
